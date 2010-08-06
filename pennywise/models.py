@@ -84,13 +84,13 @@ class Ledger(Base):
                       backref=backref('subledgers', order_by=name,
                                       cascade="all, delete-orphan"))
     #: Current balance in ledger
-    balance = Column(Numeric, nullable=False, default=0.0)
+    balance = Column(Numeric, nullable=False, default=0)
 
     query = DBSession.query_property(Query)
 
     def __init__(self, **kw):
         # Balance on new ledgers is always zero
-        kw['balance'] = 0.0
+        kw['balance'] = 0
         super(Ledger, self).__init__(**kw)
 
     def addSplitValue(self, split):
