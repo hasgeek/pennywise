@@ -1,11 +1,10 @@
 import os
-
 from setuptools import setup, find_packages
+import pennywise
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
-VERSION = open(os.path.join(here, 'VERSION.txt')).read()
 
 requires = [
     'Flask',
@@ -13,7 +12,7 @@ requires = [
     ]
 
 setup(name='pennywise',
-      version=VERSION,
+      version=pennywise.__version__,
       description='Web-based double-entry accounting server.',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

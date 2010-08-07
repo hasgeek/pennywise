@@ -103,10 +103,10 @@ class Ledger(Base):
 
     query = DBSession.query_property(Query)
 
-    def __init__(self, **kw):
+    def __init__(self, **kwargs):
         # Balance on new ledgers is always zero
-        kw['balance'] = 0
-        super(Ledger, self).__init__(**kw)
+        kwargs['balance'] = 0
+        super(Ledger, self).__init__(**kwargs)
 
     def addSplitValue(self, split):
         """
@@ -123,19 +123,18 @@ class Ledger(Base):
 
 class ForeignLedger(Ledger):
     """
-    Placeholder for a remotely-hosted ledger. These ledgers are hidden by
-    default and do not have a known balance.
+    Placeholder for a remotely-hosted ledger. These do not have a known
+    balance.
     """
     __tablename__ = 'foreignledger'
     __mapper_args__ = {'polymorphic_identity': 'foreign'}
     id = Column(Integer, ForeignKey('ledger.id'), primary_key=True)
     #: Remote location of this ledger, as a valid URL
-    url = Column(Unicode(250), nullable=False)
+    remoteurl = Column(Unicode(250), nullable=False)
 
-    def __init__(self, **kw):
-        kw['hidden'] = True
-        kw['ltype'] = LEDGER_TYPE.USER
-        super(ForeignLedger, self).__init__(**kw)
+    def __init__(self, **kwargs):
+        kwargs['ltype'] = LEDGER_TYPE.USER
+        super(ForeignLedger, self).__init__(**kwargs)
 
 
 class UserLedger(Ledger):
@@ -146,9 +145,9 @@ class UserLedger(Ledger):
     __mapper_args__ = {'polymorphic_identity': 'user'}
     id = Column(Integer, ForeignKey('ledger.id'), primary_key=True)
     
-    def __init__(self, **kw):
-        kw['placeholder'] = True
-        super(UserLedger, self).__init__(**kw)
+    def __init__(self, **kwargs):
+        kwargs['placeholder'] = True
+        super(UserLedger, self).__init__(**kwargs)
 
 
 class Transaction(Base):
@@ -171,7 +170,7 @@ class Transaction(Base):
     #: :attr:`exchangevalue`.
     exchangerate = Column(Numeric, nullable=False)
     #: Exchange value for two-currency transactions. Mutually exclusive with
-    #: :attr:`exchangerate'.
+    #: :attr:`exchangerate`.
     exchangevalue = Column(Numeric, nullable=True)
 
     query = DBSession.query_property(Query)
@@ -202,6 +201,7 @@ class TransactionSplit(Base):
 
     query = DBSession.query_property(Query)
 
-__all__ = [LEDGER_TYPE, LEDGER_SUBTYPE, LEDGER_TYPE_COMBOS,
-           Ledger, ForeignLedger, Transaction, TransactionSplit,
-           IntegrityError, NoResultFound]
+__all__ = ['LEDGER_TYPE', 'LEDGER_SUBTYPE', 'LEDGER_TYPE_COMBOS',
+           'Ledger', 'ForeignLedger', 'UserLedger', 'Transaction',
+           'TransactionSplit',
+           'IntegrityError', 'NoResultFound']
