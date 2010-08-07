@@ -4,4 +4,4 @@ from pennywise.app import app
 
 @app.route('/<username>/')
 def userpage(username):
-    return "User: %s", username
+    return "User: %s" % username
