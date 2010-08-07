@@ -25,4 +25,4 @@ SQLALCHEMY_ECHO = False
 if __name__ == '__main__':
     app.config.from_object(__name__)
     initdb()
-    app.run('0.0.0.0', 8080, debug=False)
+    app.run('0.0.0.0', 8080, debug=True)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from flask import redirect, url_for
 from pennywise.app import app
 
 @app.route('/')
@@ -13,4 +14,4 @@ def logout():
 @app.route('/favicon.ico')
 @app.route('/favicon.ico/')
 def favicon():
-    return '' # FIXME: Redirect to static resource
+    return redirect(url_for('static', filename='favicon.ico'), code=301)
