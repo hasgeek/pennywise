@@ -21,20 +21,35 @@ Base = declarative_base()
 # ----------------------------------------------------------------------------
 # Constants
 
-class LEDGERTYPE:
-    ASSET = 0
-    LIABILITY = 1
-    INCOME = 2
-    EXPENSE = 3
-    EQUITY = 4
+class LEDGER_TYPE:
+    USER = 0
+    ASSET = 1
+    LIABILITY = 2
+    INCOME = 3
+    EXPENSE = 4
+    EQUITY = 5
 
-class LEDGERSUBTYPE:
+class LEDGER_SUBTYPE:
     NA = 0
     BANK = 1
     CASH = 2
     CREDITCARD = 3
     ACC_RECEIVABLE = 4
     ACC_PAYABLE = 5
+
+LEDGER_TYPE_COMBOS = set([
+    (LEDGER_TYPE.USER, LEDGER_SUBTYPE.NA),
+    (LEDGER_TYPE.ASSET, LEDGER_SUBTYPE.NA),
+    (LEDGER_TYPE.ASSET, LEDGER_SUBTYPE.BANK),
+    (LEDGER_TYPE.ASSET, LEDGER_SUBTYPE.CASH),
+    (LEDGER_TYPE.LIABILITY, LEDGER_SUBTYPE.NA),
+    (LEDGER_TYPE.LIABILITY, LEDGER_SUBTYPE.CREDITCARD),
+    (LEDGER_TYPE.LIABILITY, LEDGER_SUBTYPE.ACC_PAYABLE),
+    (LEDGER_TYPE.INCOME, LEDGER_SUBTYPE.NA),
+    (LEDGER_TYPE.INCOME, LEDGER_SUBTYPE.ACC_RECEIVABLE),
+    (LEDGER_TYPE.EXPENSE, LEDGER_SUBTYPE.NA),
+    (LEDGER_TYPE.EQUITY, LEDGER_SUBTYPE.NA),
+    ])
 
 
 # ----------------------------------------------------------------------------
@@ -57,7 +72,7 @@ class Ledger(Base):
     location = Column(String(20), nullable=False)
     __mapper_args__ = {'polymorphic_on': location, 'polymorphic_identity': 'local'}
     #: URL name of ledger. Must be site-unique and permanent
-    name = Column(Unicode(50), unique=True, nullable=False)
+    name = Column(Unicode(50), default=makeuuid, unique=True, nullable=False)
     #: Title of ledger
     title = Column(Unicode(50), nullable=False)
     #: User code for ledger
@@ -74,7 +89,7 @@ class Ledger(Base):
     #: Ledger type
     ltype = Column('type', SmallInteger, nullable=False)
     #: Ledger sub-type, if applicable. Affects UI
-    lsubtype = Column('subtype', SmallInteger, default=LEDGERSUBTYPE.NA, nullable=False)
+    lsubtype = Column('subtype', SmallInteger, default=LEDGER_SUBTYPE.NA, nullable=False)
     #: Currency of ledger
     currency = Column(Unicode(3), default='', nullable=False)
     #: Ledger's parent, for nested ledgers
@@ -119,7 +134,21 @@ class ForeignLedger(Ledger):
 
     def __init__(self, **kw):
         kw['hidden'] = True
+        kw['ltype'] = LEDGER_TYPE.USER
         super(ForeignLedger, self).__init__(**kw)
+
+
+class UserLedger(Ledger):
+    """
+    Base ledger for all of a user's ledgers. Always a placeholder.
+    """
+    __tablename__ = 'userledger'
+    __mapper_args__ = {'polymorphic_identity': 'user'}
+    id = Column(Integer, ForeignKey('ledger.id'), primary_key=True)
+    
+    def __init__(self, **kw):
+        kw['placeholder'] = True
+        super(UserLedger, self).__init__(**kw)
 
 
 class Transaction(Base):
@@ -173,6 +202,6 @@ class TransactionSplit(Base):
 
     query = DBSession.query_property(Query)
 
-__all__ = [LEDGERTYPE, LEDGERSUBTYPE,
+__all__ = [LEDGER_TYPE, LEDGER_SUBTYPE, LEDGER_TYPE_COMBOS,
            Ledger, ForeignLedger, Transaction, TransactionSplit,
            IntegrityError, NoResultFound]
