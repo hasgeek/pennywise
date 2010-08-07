@@ -1,4 +1,4 @@
-PennyWise
+Pennywise
 =========
 
-Distributed double entry accounting server.
+Web-based multi-user double-entry accounting application using the Flask framework.

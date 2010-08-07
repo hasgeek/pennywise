@@ -9,6 +9,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 requires = [
     'Flask',
     'Flask-SQLAlchemy',
+    'SQLAlchemy>=0.6',
     ]
 
 setup(name='pennywise',
