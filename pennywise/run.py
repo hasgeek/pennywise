@@ -8,13 +8,21 @@ Main application entry point for testing. To run the test server::
   $ python pennywise/run.py
 """
 
-DEBUG = True
-SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
-SQLALCHEMY_ECHO = True
+from pennywise import app
+import pennywise.views
 
-if __name__ == '__main__':
-    from pennywise import app
-    app.config.from_object(__name__)
+def initdb():
     from pennywise.models import db
     db.create_all()
-    app.run()
+
+
+# These settings come into effect only if the call to app.config.from_object(__name__)
+# below goes through. It's safe to import this module without side-effects.
+DEBUG = True
+SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
+SQLALCHEMY_ECHO = False
+
+if __name__ == '__main__':
+    app.config.from_object(__name__)
+    initdb()
+    app.run('0.0.0.0', 8080, debug=False)

@@ -56,14 +56,13 @@ def makeuuid():
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Unicode(80), unique=True)
     fullname = db.Column(db.Unicode(80))
-    email = db.Column(db.Unicode(80))
-    openid = db.Column(db.Unicode(200))
+    username = db.Column(db.Unicode(80), unique=True, nullable=True)
+    email = db.Column(db.Unicode(80), unique=True, nullable=True)
+    openid = db.Column(db.Unicode(200), unique=True, nullable=True)
     pw_hash = db.Column(db.String(80))
     
-    def __init__(self, username, password, **kwargs):
-        self.username = username
+    def __init__(self, password=None, **kwargs):
         self.password = password
         super(User, self).__init__(**kwargs)
 
@@ -76,13 +75,7 @@ class User(db.Model):
         return check_password_hash(self.pw_hash, password)
         
     def __repr__(self):
-        return '<User %r>' % self.username
-
-    def __eq__(self, other):
-        return type(self) is type(other) and self.username == other.username
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
+        return '<User %r>' % (self.username or self.email or self.openid)
 
 
 class Ledger(db.Model):

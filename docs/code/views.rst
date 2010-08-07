@@ -5,3 +5,6 @@
 
 .. automodule:: pennywise.views
    :members:
+
+.. automodule:: pennywise.views.root
+   :members:
