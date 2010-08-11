@@ -10,6 +10,8 @@ requires = [
     'Flask',
     'Flask-SQLAlchemy',
     'SQLAlchemy>=0.6',
+    'Flask-WTF',
+    'WTForms',
     ]
 
 setup(name='pennywise',

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pennywise.app import app
+from pennywise import app
 
 @app.route('/transaction/<uuid>/')
 def transactionview(uuid):

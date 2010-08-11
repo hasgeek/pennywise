@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}{{ owner.fullname }} / {{ ledger.title }}{% endblock %}
+{% block headers %}<script language="JavaScript" src="{{ url_for('static', filename='slickgrid/slick.grid.js') }}"></script>{% endblock %}
+{% block contentarea %}
+  <div class="grid_16">
+    <table class="ledgers">
+      <thead>
+        <tr>
+          <th>Date &amp; Time</th>
+          <th class="num">Number</th>
+          <th>Description</th>
+          <th>Ledger</th>
+          <th><abbr title="Reconciled?">R</abbr></th>
+          <th class="num">Increment</th><!-- TODO -->
+          <th class="num">Decrement</th><!-- TODO -->
+          <th class="num">Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <td colspan="8">Not implemented</td>
+      </tbody>
+    </table>
+  </div>
+  <div class="clear"><!-- --></div>
+  <div class="grid_16">
+  </div>
+{% endblock %}
