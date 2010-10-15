@@ -3,6 +3,7 @@
 from flask import redirect, url_for, g, session, render_template, flash
 from pennywise import app
 from pennywise.models import db, User, UserLedger
+from pennywise.commodities import COMMODITY_TYPE, get_or_make_commodity
 from pennywise.forms.user import LoginForm, RegisterForm
 from pennywise.ledgers import make_default_ledgers
 
@@ -68,7 +69,8 @@ def register():
         db.session.add(user)
         # Make a ledger for the user
         currency = form.currency.data
-        ledger = UserLedger(owner=user, title='', currency=currency)
+        commodity = get_or_make_commodity(type=COMMODITY_TYPE.CURRENCY, symbol=currency, commit=False)
+        ledger = UserLedger(owner=user, title='', commodity=commodity)
         db.session.add(ledger)
         # Make some default ledgers
         make_default_ledgers(ledger)

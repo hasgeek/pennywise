@@ -289,6 +289,10 @@ table.ledgers tr.hidden {
     display: none;
 }
 
+table.ledgers tr.shown {
+    color: #999;
+}
+
 table.ledgers td.l1 {
     padding-left: 0em;
 }
@@ -348,8 +352,10 @@ dl.form p.error {
     margin-left: 1em;
     -moz-border-radius-bottomleft: 0.25em;
     -webkit-border-bottom-left-radius: 0.25em;
+    border-bottom-left-radius: 0.25em;
     -moz-border-radius-bottomright: 0.25em;
     -webkit-border-bottom-right-radius: 0.25em;
+    border-bottom-right-radius: 0.25em;
 }
 
 ul#globalnav {
@@ -373,7 +379,7 @@ ul#globalnav li a {
     -moz-border-radius: 0.25em;
 }
 
-ul#globalnav li a:hover {
+ul#globalnav li a:hover, ul#globalnav li a:active {
     background-color: #c0c0c0;
 }
 

@@ -14,7 +14,7 @@
       </thead>
       <tbody>
         {% for l in ledgers -%}
-          <tr class="{% if l['ledger'].placeholder %}placeholder{% else %}ledger{% endif %}{% if l['ledger'].hidden %} hidden{% endif %}">
+          <tr class="{% if l['ledger'].placeholder %}placeholder{% else %}ledger{% endif %}{% if l['hidden']%} hidden{% endif %}">
             <td class="l{{ l['level'] }}"><a class="row" href="{{ l['url'] }}"><input type="checkbox" name="{{ l['ledger'].uuid }}"/> {{ l['ledger'].title }}</a></td>
             <td><a class="row" href="{{ l['url'] }}">{{ l['ledger'].description }}&nbsp;</a></td>
             <td class="num"><a class="row" href="{{ l['url'] }}">{{ l['ledger'].formatted_balance() }}</a></td>

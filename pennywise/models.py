@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# See http://wiki.gnucash.org/wiki/SQL for source of ideas
+
 import uuid
 import datetime
 
@@ -29,6 +31,7 @@ class LEDGER_SUBTYPE:
     ACC_RECEIVABLE = 4
     ACC_PAYABLE = 5
 
+# TODO: Make this a dictionary. More effective for look-ups
 LEDGER_TYPE_COMBOS = set([
     (LEDGER_TYPE.USER, LEDGER_SUBTYPE.NA),
     (LEDGER_TYPE.ASSET, LEDGER_SUBTYPE.NA),
@@ -43,12 +46,35 @@ LEDGER_TYPE_COMBOS = set([
     (LEDGER_TYPE.EQUITY, LEDGER_SUBTYPE.NA),
     ])
 
+class COMMODITY_TYPE:
+    #: A cash currency
+    CURRENCY = 0
+    #: A traded stock (symbol will be NYSE:AAPL, etc)
+    STOCK = 1
+    #: A mutual fund (TODO: figure out symbols/names)
+    FUND = 2
+
+# TODO: Add Acc/receivable and payable, and cross-check signage
+
+#: Ledger headers for debit, credit, and signage
+#: These labels and signage are for personal accounts, as defined at
+#: http://en.wikipedia.org/wiki/Debits_and_credits#Operational_Principles
+TRANSFER_COLUMNS = {
+    (LEDGER_TYPE.ASSET,     LEDGER_SUBTYPE.NA):         (u'Increase', u'Decrease',   +1),
+    (LEDGER_TYPE.ASSET,     LEDGER_SUBTYPE.BANK):       (u'Deposit',  u'Withdrawal', +1),
+    (LEDGER_TYPE.ASSET,     LEDGER_SUBTYPE.CASH):       (u'Receive',  u'Spend',      +1),
+    (LEDGER_TYPE.LIABILITY, LEDGER_SUBTYPE.NA):         (u'Decrease', u'Increase',   -1),
+    (LEDGER_TYPE.LIABILITY, LEDGER_SUBTYPE.CREDITCARD): (u'Payment',  u'Charge',     -1),
+    (LEDGER_TYPE.INCOME,    LEDGER_SUBTYPE.NA):         (u'Charge',   u'Income',     -1),
+    (LEDGER_TYPE.EXPENSE,   LEDGER_SUBTYPE.NA):         (u'Expense',  u'Rebate',     +1),
+    (LEDGER_TYPE.EQUITY,    LEDGER_SUBTYPE.NA):         (u'Decrease', u'Increase',   -1),
+    }
 
 # ----------------------------------------------------------------------------
 # Helper functions
 
 def makeuuid():
-    return str(uuid.uuid4())
+    return uuid.uuid4().hex
 
 
 # ----------------------------------------------------------------------------
@@ -82,6 +108,18 @@ class User(db.Model):
         return '<User %r>' % (self.username or self.email or self.openid)
 
 
+class Commodity(db.Model):
+    """
+    Commodities (currencies, funds, etc)
+    """
+    __tablename__ = 'commodity'
+    id = db.Column(db.Integer, primary_key=True)
+    #: Type of commodity
+    type = db.Column(db.SmallInteger, nullable=False, default=COMMODITY_TYPE.CURRENCY)
+    symbol = db.Column(db.Unicode(20), nullable=False)
+    name = db.Column(db.Unicode(250), nullable=False, default='')
+
+
 class Ledger(db.Model):
     """
     Ledger containing transactions with other ledgers.
@@ -112,13 +150,14 @@ class Ledger(db.Model):
     #: Ledger sub-type, if applicable. Affects UI
     lsubtype = db.Column('subtype', db.SmallInteger,
                          default=LEDGER_SUBTYPE.NA, nullable=False)
-    #: Currency of ledger
-    currency = db.Column(db.Unicode(3), default='', nullable=False)
+    #: Commodity of ledger
+    commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'), nullable=False)
+    commodity = db.relation(Commodity, primaryjoin=commodity_id == Commodity.id)
     #: Ledger's parent, for nested ledgers
     parent_id = db.Column(db.Integer, db.ForeignKey('ledger.id'), nullable=True)
     #: SQLAlchemy mapper to access parent ledger object
     parent = db.relation('Ledger', remote_side=[id], backref=db.backref('subledgers', order_by=title))
-    #: Current balance in ledger
+    #: Current balance in ledger. XXX: Is this really required?
     balance = db.Column(db.Numeric, nullable=False, default=0)
 
     def __repr__(self):
@@ -145,7 +184,7 @@ class Ledger(db.Model):
         """
         Return balance as a formatted string.
         """
-        return '%s %.2f' % (currency_symbols.get(self.currency, self.currency), self.balance)
+        return '%s %.2f' % (currency_symbols.get(self.commodity.symbol, self.commodity.symbol), self.balance)
 
 
 class ForeignLedger(Ledger):
@@ -238,16 +277,12 @@ class Transaction(db.Model):
     num = db.Column(db.Unicode(30), nullable=False, default='')
     #: User description of transaction
     description = db.Column(db.Unicode(250), nullable=False, default='')
-    #: Transactions may be disabled while speculating on expenses
+    #: Commodity (usually currency) that this transaction is in
+    commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'), nullable=False)
+    commodity = db.relation(Commodity, primaryjoin=commodity_id == Commodity.id)
+    #: Transactions may be disabled while speculating on expenses.
+    #: Disabled transactions don't add to the balance
     disabled = db.Column(db.Boolean, default=False, nullable=False)
-    #: This is a cross-currency transaction
-    crosscurrency = db.Column(db.Boolean, default=False, nullable=False)
-    #: Exchange rate for two-currency transactions. Mutually exclusive with
-    #: :attr:`exchangevalue`.
-    exchangerate = db.Column(db.Numeric, nullable=False)
-    #: Exchange value for two-currency transactions. Mutually exclusive with
-    #: :attr:`exchangerate`.
-    exchangevalue = db.Column(db.Numeric, nullable=True)
 
     def validate(self):
         """
@@ -259,7 +294,10 @@ class Transaction(db.Model):
 
 class TransactionSplit(db.Model):
     """
-    Transaction split, connecting a transaction to a ledger.
+    Transaction split, connecting a transaction to a ledger. Each split has a
+    :attr:`value` specified in the primary commodity of the transaction. The
+    sum of all split values always equals zero. If the split connects to a
+    ledger with a different commodity, :attr:`quantity` is the exchange value.
     """
     __tablename__ = 'transactionsplit'
     id = db.Column(db.Integer, primary_key=True)
@@ -268,7 +306,7 @@ class TransactionSplit(db.Model):
     #: SQLAlchemy mapper to load ledger object
     ledger = db.relation(Ledger, primaryjoin=ledger_id == Ledger.id,
                       backref=db.backref('splits', order_by=id,
-                                      cascade='all, delete-orphan'))
+                                      cascade='all'))
     #: Transaction that this split belongs to
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)
     #: SQLALchemy mapper to load transaction object
@@ -277,8 +315,13 @@ class TransactionSplit(db.Model):
                                            cascade='all, delete-orphan'))
     #: Has this transaction been reconciled within this ledger?
     reconciled = db.Column(db.Boolean, default=False, nullable=False)
+    #: Date of reconciliation
+    reconciled_date = db.Column(db.DateTime, nullable=True)
     #: Value of transaction
     value = db.Column(db.Numeric, nullable=False)
+    #: Quantity of transaction (same as value, except for cross-currency transactions)
+    quantity = db.Column(db.Numeric, nullable=False)
+
 
 __all__ = ['db',
            'LEDGER_TYPE', 'LEDGER_SUBTYPE', 'LEDGER_TYPE_COMBOS',
