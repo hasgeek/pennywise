@@ -7,7 +7,7 @@ import datetime
 
 from pennywise import app
 from pennywise.data import currency_symbols
-from flaskext.sqlalchemy import SQLAlchemy
+from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
 
 db = SQLAlchemy(app)

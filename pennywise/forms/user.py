@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from flaskext.wtf import Form, TextField, PasswordField, BooleanField, SelectField
-from flaskext.wtf import Required, Email, EqualTo, ValidationError
+from flask.ext.wtf import Form, TextField, PasswordField, BooleanField, SelectField
+from flask.ext.wtf import Required, Email, EqualTo, ValidationError
 
 from pennywise.models import User
 from pennywise.data import currency_codes
