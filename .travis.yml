@@ -1,0 +1,19 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "pypy"
+# command to install dependencies
+install:
+  - python setup.py develop
+  - pip install nose coverage --use-mirrors
+  - 'if [[ "$TRAVIS_PYTHON_VERSION" != "pypy" ]]; then pip install psycopg2 --use-mirrors; fi'
+# command to run tests
+before_script:
+  - psql -c 'create database myapp_test;' -U postgres
+script:
+  - 'if [[ "$TRAVIS_PYTHON_VERSION" != "pypy" ]]; then nosetests ; fi'
+  - 'if [[ "$TRAVIS_PYTHON_VERSION" == "pypy" ]]; then SQLALCHEMY_DATABASE_URI="sqlite://" nosetests ; fi'
+notifications:
+  email: false
+  irc: "irc.freenode.net#hasgeek-dev"
