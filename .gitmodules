@@ -1,3 +1,0 @@
-[submodule "pennywise/static/slickgrid"]
-	path = pennywise/static/slickgrid
-	url = git://github.com/mleibman/SlickGrid.git

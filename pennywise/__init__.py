@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Pennywise is a web-based multi-user double-entry accounting application using the Flask framework.
+Pennywise is a multi-user and multi-currency double-entry accounting
+engine.
 """
-from flask import Flask
-app = Flask(__name__)
-app.config.from_object('pennywise.default_settings')
-__version__ = '0.1'
 
-import pennywise.views
+from __future__ import absolute_import
+from . import _version, models
+from ._version import *
+from .models import *
+
+__all__ = _version.__all__ + models.__all__
