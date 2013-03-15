@@ -43,4 +43,7 @@ setup(name='pennywise',
     zip_safe=False,
     test_suite='pennywise',
     install_requires=requires,
+    dependency_links=[
+        "https://github.com/hasgeek/nodular/archive/master.zip#egg=nodular"
+        ]
     )
