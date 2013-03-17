@@ -6,6 +6,7 @@ currency_codes = (
     (u"USD", u"USD - United States of America, Dollars"),
     (u"EUR", u"EUR - Euro Member Countries, Euro"),
     (u"GBP", u"GBP - United Kingdom, Pounds"),
+    (u"BTC", u"BTC - Bitcoin"),
     (u"",    u"----"),
     (u"AED", u"AED - United Arab Emirates, Dirhams"),
     (u"AFN", u"AFN - Afghanistan, Afghanis"),
@@ -194,4 +195,5 @@ currency_symbols = {
     u'THB': u'฿',
     u'KHR': u'៛',
     u'KRW': u'₩',
+    u'BTC': u'B⃦',
     }

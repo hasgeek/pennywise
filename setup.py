@@ -14,8 +14,9 @@ else:
     raise RuntimeError("Unable to find version string in pennywise/_version.py.")
 
 requires = [
-    'nodular',
     'SQLAlchemy>=0.8',
+    'Flask-SQLAlchemy',
+    'nodular',
     ]
 
 setup(name='pennywise',

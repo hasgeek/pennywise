@@ -62,6 +62,6 @@ class TransactionSplit(db.Model):
     #: Date of reconciliation
     reconciled_date = db.Column(db.DateTime, nullable=True)
     #: Value of transaction
-    value = db.Column(db.Numeric(20, 3), nullable=False)
+    value = db.Column(db.Numeric, nullable=False)
     #: Quantity of transaction (same as value, except for cross-currency transactions)
-    quantity = db.Column(db.Numeric(20, 3), nullable=False)
+    quantity = db.Column(db.Numeric, nullable=False)
