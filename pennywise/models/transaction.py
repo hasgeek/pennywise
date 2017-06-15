@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from coaster import newid
+from coaster.utils import buid as buid_func
 from . import db
 from .ledger import Ledger
 from .commodity import Commodity
@@ -16,7 +16,7 @@ class Transaction(db.Model):
     __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
     #: Transaction UUID as a 22-char Base64 representation
-    buid = db.Column(db.String(22), nullable=False, default=newid)
+    buid = db.Column(db.String(22), nullable=False, default=buid_func)
     #: Transaction date and time in UTC timezone
     datetime = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     #: User-facing transaction id number
